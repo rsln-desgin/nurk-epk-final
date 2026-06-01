@@ -1,0 +1,11 @@
+web/audio/*.wav
+web/bg-experiments
+web/bg-options
+_legacy
+EPK Photo Content
+NURK SONGS
+NURK MUSIC
+INSPO
+*.md
+skills-lock.json
+epk.html

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NURK / V2 · WISPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fg:      oklch(0.97 0.005 250);
+    --fg-soft: oklch(0.90 0.012 245);
+    --display: 'Anton', 'Arial Narrow', sans-serif;
+    --sans:    'Inter', system-ui, sans-serif;
+    --mono:    'JetBrains Mono', ui-monospace, monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh; color: var(--fg);
+    font: 400 15px/1.55 var(--sans);
+    overflow: hidden;
+    background: linear-gradient(
+      180deg,
+      oklch(0.42 0.085 220)    0%,
+      oklch(0.58 0.085 220)   30%,
+      oklch(0.74 0.080 220)   55%,
+      oklch(0.87 0.075 220)   75%,
+      oklch(0.96 0.020 220)  100%
+    );
+  }
+  #bg { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  .stage {
+    position: relative; z-index: 2;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .mark {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(120px, 28vw, 480px);
+    line-height: 0.86; letter-spacing: -0.02em;
+    text-transform: uppercase; margin: 0;
+    text-shadow: 0 1px 0 oklch(1 0 0 / 0.10);
+  }
+  .caption {
+    position: fixed; left: 16px; bottom: 16px; z-index: 50;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--fg-soft);
+    padding: 10px 14px; border-radius: 8px;
+    background: oklch(1 0.01 245 / 0.06);
+    border: 1px solid oklch(1 0.01 245 / 0.14);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+</style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <main class="stage"><h1 class="mark">NURK</h1></main>
+  <div class="caption">V2 · WISPS · thin streaks rising like cold breath</div>
+
+<script>
+(() => {
+  const c   = document.getElementById('bg');
+  const ctx = c.getContext('2d');
+
+  /* tunables */
+  const MAX_PARTS    = 32;
+  const SPAWN_PER_S  = 1.6;
+  const RISE_SPEED   = 55;     /* px/s, base */
+  const SWAY_AMP     = 0.6;    /* sway per frame */
+  const TTL_MS       = [4000, 6500];
+  const WIDTH_PX     = [55, 130];
+  const STRETCH      = [3.4, 5.5]; /* height = width * stretch */
+
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    c.width  = Math.floor(innerWidth  * dpr);
+    c.height = Math.floor(innerHeight * dpr);
+    c.style.width  = innerWidth  + 'px';
+    c.style.height = innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  const parts = [];
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  function spawn(now) {
+    parts.push({
+      x: Math.random() * innerWidth,
+      y: innerHeight + 30,
+      vy: -(RISE_SPEED + Math.random() * 35),
+      sway: rand(0.4, 1.0) * SWAY_AMP,
+      swayPhase: Math.random() * Math.PI * 2,
+      swayFreq: rand(0.0006, 0.0012),
+      born: now,
+      ttl: rand(TTL_MS[0], TTL_MS[1]),
+      width: rand(WIDTH_PX[0], WIDTH_PX[1]),
+      stretch: rand(STRETCH[0], STRETCH[1]),
+    });
+  }
+
+  let lastT = performance.now();
+  let spawnCarry = 0;
+
+  function frame(now) {
+    const dt = Math.min(0.05, (now - lastT) / 1000);
+    lastT = now;
+
+    spawnCarry += SPAWN_PER_S * dt;
+    while (spawnCarry >= 1 && parts.length < MAX_PARTS) {
+      spawn(now); spawnCarry -= 1;
+    }
+
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    ctx.globalCompositeOperation = 'lighter';
+
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      const age = (now - p.born) / p.ttl;
+      if (age >= 1) { parts.splice(i, 1); continue; }
+
+      p.y += p.vy * dt;
+      const swayX = Math.sin(now * p.swayFreq + p.swayPhase) * p.sway * 18;
+
+      const fade = Math.sin(age * Math.PI); /* 0 → 1 → 0 over lifetime */
+
+      ctx.save();
+      ctx.translate(p.x + swayX, p.y);
+      ctx.scale(1, p.stretch);
+      const r = p.width / 2;
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+      g.addColorStop(0,    `rgba(225, 245, 252, ${0.18 * fade})`);
+      g.addColorStop(0.55, `rgba(195, 230, 245, ${0.07 * fade})`);
+      g.addColorStop(1,    'rgba(195, 230, 245, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

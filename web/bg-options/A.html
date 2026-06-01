@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NURK · BG TEST · Option A — cool-chroma push</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fg:      oklch(0.97 0.005 250);
+    --fg-soft: oklch(0.90 0.012 245);
+    --ink:     oklch(0.18 0.04 245);
+    --muted:   oklch(0.78 0.018 245);
+    --signal:  oklch(0.93 0.085 220);
+    --display: 'Anton', 'Arial Narrow', sans-serif;
+    --sans:    'Inter', system-ui, sans-serif;
+    --mono:    'JetBrains Mono', ui-monospace, monospace;
+    --ease:    cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    color: var(--fg);
+    font: 400 15px/1.55 var(--sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+    /* === OPTION A — cool-chroma push === */
+    background:
+      radial-gradient(ellipse 60% 30% at 80% 5%,  oklch(0.58 0.130 220 / 0.55), transparent 60%),
+      radial-gradient(ellipse 50% 25% at 10% 35%, oklch(0.32 0.110 230 / 0.45), transparent 65%),
+      radial-gradient(ellipse 70% 25% at 60% 70%, oklch(0.58 0.120 220 / 0.50), transparent 60%),
+      linear-gradient(
+        180deg,
+        oklch(0.40 0.130 220)    0%,
+        oklch(0.50 0.125 220)   30%,
+        oklch(0.56 0.115 220)   60%,
+        oklch(0.60 0.105 220)   85%,
+        oklch(0.62 0.095 220)  100%
+      );
+    background-attachment: fixed;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.65; mix-blend-mode: overlay;
+  }
+
+  .nav {
+    position: fixed; top: 16px; left: 16px; right: 16px; z-index: 50;
+    padding: 14px 22px;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    border-radius: 14px;
+    background: oklch(1 0.01 245 / 0.06);
+    border: 1px solid oklch(1 0.01 245 / 0.14);
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0.01 245 / 0.18),
+      inset 0 -1px 0 oklch(0.18 0.04 245 / 0.10),
+      0 20px 60px oklch(0.18 0.04 245 / 0.30);
+  }
+  .nav__cat  { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--fg-soft); }
+  .nav__opt  { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--signal); text-align: center; }
+  .nav__mark { font-family: var(--display); font-size: 22px; letter-spacing: -0.015em; text-align: right; text-transform: uppercase; }
+
+  .header {
+    position: relative; z-index: 2;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 80px 32px;
+    gap: 32px;
+  }
+  .header__mark {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(120px, 28vw, 480px);
+    line-height: 0.86; letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-align: center;
+    margin: 0;
+  }
+  .header__copy {
+    font-family: var(--sans); font-size: 16px; line-height: 1.65;
+    color: var(--fg-soft);
+    max-width: 56ch;
+    text-align: center;
+    margin: 0;
+  }
+  .header__ctas { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .glass-cta {
+    position: relative;
+    display: inline-flex; align-items: center; gap: 14px;
+    padding: 16px 28px;
+    border-radius: 999px;
+    background: oklch(1 0.01 245 / 0.06);
+    border: 1px solid oklch(1 0.01 245 / 0.16);
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+    color: var(--fg);
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.24em;
+    text-transform: uppercase;
+    transition: background 280ms var(--ease), border-color 280ms var(--ease);
+    text-decoration: none;
+  }
+  .glass-cta:hover { background: oklch(1 0.01 245 / 0.10); border-color: oklch(1 0.01 245 / 0.32); }
+
+  .caption {
+    position: fixed; left: 16px; bottom: 16px; z-index: 50;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--fg-soft);
+    padding: 10px 14px; border-radius: 8px;
+    background: oklch(1 0.01 245 / 0.06);
+    border: 1px solid oklch(1 0.01 245 / 0.14);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    max-width: calc(100vw - 200px);
+  }
+  .switcher {
+    position: fixed; right: 16px; bottom: 16px; z-index: 50;
+    display: flex; gap: 6px;
+    padding: 8px 10px; border-radius: 8px;
+    background: oklch(1 0.01 245 / 0.06);
+    border: 1px solid oklch(1 0.01 245 / 0.14);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+  .switcher a {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--fg-soft);
+    padding: 4px 8px; border-radius: 4px; text-decoration: none;
+    transition: background 200ms var(--ease), color 200ms var(--ease);
+  }
+  .switcher a.is-current { background: var(--signal); color: var(--ink); }
+  .switcher a:hover:not(.is-current) { color: var(--fg); background: oklch(1 0.01 245 / 0.08); }
+</style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__cat">CAT №.NURK / SS26</div>
+    <div class="nav__opt">Option A · cool-chroma</div>
+    <div class="nav__mark">NURK</div>
+  </nav>
+
+  <header class="header">
+    <h1 class="header__mark">NURK</h1>
+    <p class="header__copy">Body copy at 16px Inter — worst-case AA test surface. NURK is a DJ and producer based in Tallinn — hard house, trance, UK garage, house, techno. The set bends to the room, not the other way around.</p>
+    <div class="header__ctas">
+      <a class="glass-cta" href="#">Book</a>
+      <a class="glass-cta" href="#">Listen</a>
+    </div>
+  </header>
+
+  <div class="caption">A · Cool-chroma push · same lightness, more saturation</div>
+  <div class="switcher">
+    <a href="A.html" class="is-current">A</a>
+    <a href="B.html">B</a>
+    <a href="C.html">C</a>
+    <a href="D.html">D</a>
+    <a href="E.html">E</a>
+  </div>
+
+</body>
+</html>

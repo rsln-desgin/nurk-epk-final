@@ -1,0 +1,20 @@
+# Large audio originals (site uses .m4a)
+web/audio/*.wav
+
+# Non-web content
+EPK Photo Content/
+NURK MUSIC/
+NURK SONGS/
+INSPO/
+_legacy/
+
+# Claude Code
+.agents/
+.claude/
+skills-lock.json
+
+# Vercel local config
+.vercel/
+
+# OS
+.DS_Store

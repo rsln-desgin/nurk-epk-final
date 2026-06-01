@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NURK / bg variant 4 · wordmark scatter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fg:      oklch(0.97 0.005 250);
+    --fg-soft: oklch(0.90 0.012 245);
+    --display: 'Anton', 'Arial Narrow', sans-serif;
+    --sans:    'Inter', system-ui, sans-serif;
+    --mono:    'JetBrains Mono', ui-monospace, monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh; color: var(--fg);
+    font: 400 15px/1.55 var(--sans);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 60% 30% at 80% 5%,  oklch(0.55 0.10 220 / 0.55), transparent 60%),
+      radial-gradient(ellipse 50% 25% at 10% 35%, oklch(0.30 0.07 230 / 0.40), transparent 65%),
+      radial-gradient(ellipse 70% 25% at 60% 70%, oklch(0.78 0.085 220 / 0.45), transparent 60%),
+      linear-gradient(
+        180deg,
+        oklch(0.42 0.085 220)    0%,
+        oklch(0.58 0.085 220)   30%,
+        oklch(0.74 0.080 220)   55%,
+        oklch(0.87 0.075 220)   75%,
+        oklch(0.96 0.020 220)  100%
+      );
+  }
+  .stage {
+    position: relative; z-index: 2;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .mark {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(120px, 28vw, 480px);
+    line-height: 0.86; letter-spacing: -0.02em;
+    text-transform: uppercase; margin: 0;
+    display: inline-flex;
+    text-shadow: 0 1px 0 oklch(1 0 0 / 0.10);
+  }
+  .mark span {
+    display: inline-block;
+    will-change: transform;
+    transform: translate(0, 0);
+  }
+  .caption {
+    position: fixed; left: 16px; bottom: 16px; z-index: 50;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--fg-soft);
+    padding: 10px 14px; border-radius: 8px;
+    background: oklch(1 0.01 245 / 0.06);
+    border: 1px solid oklch(1 0.01 245 / 0.14);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+</style>
+</head>
+<body>
+  <main class="stage">
+    <h1 class="mark"><span>N</span><span>U</span><span>R</span><span>K</span></h1>
+  </main>
+  <div class="caption">Variant 4 · Wordmark scatter · move cursor near letters</div>
+
+<script>
+(() => {
+  const glyphs = Array.from(document.querySelectorAll('.mark span'));
+  if (!glyphs.length) return;
+
+  const MAX_PUSH = 32;   /* px — ceiling per axis */
+  const FALLOFF  = 280;  /* px — distance at which influence ~= 1/e */
+  const LERP_M   = 0.14; /* pointer smoothing */
+  const LERP_G   = 0.18; /* glyph spring */
+
+  let tx = innerWidth / 2, ty = innerHeight / 2;
+  let mx = tx, my = ty;
+  addEventListener('pointermove', (e) => { tx = e.clientX; ty = e.clientY; });
+  addEventListener('pointerleave', () => { tx = innerWidth / 2; ty = innerHeight / 2; });
+
+  const state = glyphs.map(() => ({ dx: 0, dy: 0 }));
+
+  /* cache glyph centers, recompute on resize */
+  let centers = [];
+  function measure() {
+    centers = glyphs.map(g => {
+      const r = g.getBoundingClientRect();
+      return { cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+    });
+  }
+  addEventListener('resize', measure);
+  /* re-measure once fonts settle */
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  setTimeout(measure, 0);
+  setTimeout(measure, 400);
+
+  function frame() {
+    mx += (tx - mx) * LERP_M;
+    my += (ty - my) * LERP_M;
+
+    for (let i = 0; i < glyphs.length; i++) {
+      const c = centers[i]; if (!c) continue;
+      const dx = c.cx - mx, dy = c.cy - my;
+      const dist = Math.hypot(dx, dy);
+      const influence = Math.exp(-dist / FALLOFF);
+      const push = influence * MAX_PUSH;
+      const ang = Math.atan2(dy, dx);
+      const targetX = Math.cos(ang) * push;
+      const targetY = Math.sin(ang) * push;
+      const s = state[i];
+      s.dx += (targetX - s.dx) * LERP_G;
+      s.dy += (targetY - s.dy) * LERP_G;
+      glyphs[i].style.transform = `translate(${s.dx.toFixed(2)}px, ${s.dy.toFixed(2)}px)`;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

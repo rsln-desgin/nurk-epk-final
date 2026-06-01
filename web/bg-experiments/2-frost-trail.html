@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NURK / bg variant 2 · frost trail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fg:      oklch(0.97 0.005 250);
+    --fg-soft: oklch(0.90 0.012 245);
+    --display: 'Anton', 'Arial Narrow', sans-serif;
+    --sans:    'Inter', system-ui, sans-serif;
+    --mono:    'JetBrains Mono', ui-monospace, monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh; color: var(--fg); cursor: crosshair;
+    font: 400 15px/1.55 var(--sans);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 60% 30% at 80% 5%,  oklch(0.55 0.10 220 / 0.45), transparent 60%),
+      radial-gradient(ellipse 70% 25% at 60% 70%, oklch(0.78 0.085 220 / 0.35), transparent 60%),
+      linear-gradient(
+        180deg,
+        oklch(0.42 0.085 220)    0%,
+        oklch(0.58 0.085 220)   30%,
+        oklch(0.74 0.080 220)   55%,
+        oklch(0.87 0.075 220)   75%,
+        oklch(0.96 0.020 220)  100%
+      );
+  }
+  #trail { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  .stage {
+    position: relative; z-index: 2;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .mark {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(120px, 28vw, 480px);
+    line-height: 0.86; letter-spacing: -0.02em;
+    text-transform: uppercase; margin: 0;
+    text-shadow: 0 1px 0 oklch(1 0 0 / 0.10);
+  }
+  .caption {
+    position: fixed; left: 16px; bottom: 16px; z-index: 50;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--fg-soft);
+    padding: 10px 14px; border-radius: 8px;
+    background: oklch(1 0.01 245 / 0.06);
+    border: 1px solid oklch(1 0.01 245 / 0.14);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+</style>
+</head>
+<body>
+  <canvas id="trail"></canvas>
+  <main class="stage"><h1 class="mark">NURK</h1></main>
+  <div class="caption">Variant 2 · Frost breath · move cursor</div>
+
+<script>
+(() => {
+  const c = document.getElementById('trail');
+  const ctx = c.getContext('2d');
+
+  const TTL          = 950;   /* ms */
+  const MAX_RADIUS   = 110;   /* px */
+  const MAX_PUFFS    = 90;
+  const STEP_PX      = 14;    /* emit a puff each ~14px of cursor travel */
+
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    c.width  = Math.floor(innerWidth  * dpr);
+    c.height = Math.floor(innerHeight * dpr);
+    c.style.width  = innerWidth  + 'px';
+    c.style.height = innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  const puffs = [];
+  let lastX = -1, lastY = -1;
+
+  addEventListener('pointermove', (e) => {
+    const now = performance.now();
+    if (lastX < 0) { lastX = e.clientX; lastY = e.clientY; return; }
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    const dist = Math.hypot(dx, dy);
+    const steps = Math.min(8, Math.floor(dist / STEP_PX));
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      puffs.push({
+        x:   lastX + dx * t,
+        y:   lastY + dy * t,
+        born: now,
+        r:   MAX_RADIUS * (0.6 + Math.random() * 0.5),
+        jx:  (Math.random() - 0.5) * 12,
+        jy:  -6 - Math.random() * 10, /* slight upward drift */
+      });
+    }
+    if (puffs.length > MAX_PUFFS) puffs.splice(0, puffs.length - MAX_PUFFS);
+    lastX = e.clientX; lastY = e.clientY;
+  });
+
+  function frame(now) {
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = puffs.length - 1; i >= 0; i--) {
+      const p = puffs[i];
+      const age = (now - p.born) / TTL;
+      if (age >= 1) { puffs.splice(i, 1); continue; }
+      const fade = 1 - age;
+      const r = p.r * (0.45 + age * 0.65);
+      const cx = p.x + p.jx * age;
+      const cy = p.y + p.jy * age;
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      grad.addColorStop(0,    `rgba(200, 240, 250, ${0.32 * fade})`);
+      grad.addColorStop(0.45, `rgba(170, 225, 240, ${0.14 * fade})`);
+      grad.addColorStop(1,    'rgba(170, 225, 240, 0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

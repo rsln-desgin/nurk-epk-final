@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NURK / bg variant 3 · audio reactive + spotlight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --signal:  oklch(0.93 0.085 220);
+    --ink:     oklch(0.18 0.04 245);
+    --fg:      oklch(0.97 0.005 250);
+    --fg-soft: oklch(0.90 0.012 245);
+    --display: 'Anton', 'Arial Narrow', sans-serif;
+    --sans:    'Inter', system-ui, sans-serif;
+    --mono:    'JetBrains Mono', ui-monospace, monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh; color: var(--fg);
+    font: 400 15px/1.55 var(--sans);
+    overflow: hidden;
+    background: linear-gradient(
+      180deg,
+      oklch(0.42 0.085 220)    0%,
+      oklch(0.58 0.085 220)   30%,
+      oklch(0.74 0.080 220)   55%,
+      oklch(0.87 0.075 220)   75%,
+      oklch(0.96 0.020 220)  100%
+    );
+  }
+  #bgcanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  .stage {
+    position: relative; z-index: 2;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .mark {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(120px, 28vw, 480px);
+    line-height: 0.86; letter-spacing: -0.02em;
+    text-transform: uppercase; margin: 0;
+    text-shadow: 0 1px 0 oklch(1 0 0 / 0.10);
+  }
+  .caption {
+    position: fixed; left: 16px; bottom: 16px; z-index: 50;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--fg-soft);
+    padding: 10px 14px; border-radius: 8px;
+    background: oklch(1 0.01 245 / 0.06);
+    border: 1px solid oklch(1 0.01 245 / 0.14);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+  .play {
+    position: fixed; right: 16px; bottom: 16px; z-index: 50;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--ink);
+    padding: 12px 22px; border: 0; border-radius: 999px;
+    background: var(--signal); cursor: pointer;
+    box-shadow: 0 12px 40px oklch(0.18 0.04 245 / 0.30);
+  }
+</style>
+</head>
+<body>
+  <canvas id="bgcanvas"></canvas>
+  <main class="stage"><h1 class="mark">NURK</h1></main>
+  <div class="caption">Variant 3 · Audio + spotlight · press play, move cursor</div>
+  <button class="play" id="playbtn">PLAY</button>
+  <audio id="aud" src="../audio/here-i-am.mp3" preload="auto"></audio>
+
+<script>
+(() => {
+  const c   = document.getElementById('bgcanvas');
+  const ctx = c.getContext('2d');
+  const aud = document.getElementById('aud');
+  const btn = document.getElementById('playbtn');
+
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    c.width  = Math.floor(innerWidth  * dpr);
+    c.height = Math.floor(innerHeight * dpr);
+    c.style.width  = innerWidth  + 'px';
+    c.style.height = innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  /* base blobs (positions match sketch.html's three radials) */
+  const blobs = [
+    { bx: 0.80, by: 0.05, r: 0.55, color: '120, 200, 230' },
+    { bx: 0.10, by: 0.35, r: 0.50, color: '60, 130, 175'  },
+    { bx: 0.60, by: 0.70, r: 0.70, color: '180, 235, 250' },
+  ];
+
+  let actx = null, analyser = null, freq = null;
+  let pulse = 0, bassEnv = 0;
+
+  btn.addEventListener('click', async () => {
+    if (!actx) {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      const src = actx.createMediaElementSource(aud);
+      analyser  = actx.createAnalyser();
+      analyser.fftSize = 256;
+      src.connect(analyser);
+      analyser.connect(actx.destination);
+      freq = new Uint8Array(analyser.frequencyBinCount);
+    }
+    if (aud.paused) {
+      await actx.resume();
+      await aud.play();
+      btn.textContent = 'PAUSE';
+    } else {
+      aud.pause();
+      btn.textContent = 'PLAY';
+    }
+  });
+
+  let tx = 0.5, ty = 0.5, mx = 0.5, my = 0.5;
+  addEventListener('pointermove', (e) => {
+    tx = e.clientX / innerWidth;
+    ty = e.clientY / innerHeight;
+  });
+
+  function frame(now) {
+    /* audio pulse: bass = avg of low 8 bins */
+    if (analyser && !aud.paused) {
+      analyser.getByteFrequencyData(freq);
+      let bass = 0;
+      for (let i = 0; i < 8; i++) bass += freq[i];
+      const inst = bass / 8 / 255;
+      bassEnv += (inst - bassEnv) * 0.25;
+      pulse = bassEnv;
+    } else {
+      /* idle breath so the page isn't dead before play */
+      pulse = 0.32 + Math.sin(now * 0.0012) * 0.06;
+    }
+
+    mx += (tx - mx) * 0.08;
+    my += (ty - my) * 0.08;
+
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    ctx.globalCompositeOperation = 'source-over';
+
+    for (const b of blobs) {
+      const r  = innerWidth * b.r * (0.92 + pulse * 0.30);
+      const cx = innerWidth  * b.bx;
+      const cy = innerHeight * b.by;
+      const a  = 0.42 * (0.65 + pulse * 0.55);
+      const g  = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      g.addColorStop(0,    `rgba(${b.color}, ${a})`);
+      g.addColorStop(0.6,  `rgba(${b.color}, ${a * 0.25})`);
+      g.addColorStop(1,    `rgba(${b.color}, 0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, innerWidth, innerHeight);
+    }
+
+    /* cursor spotlight on top */
+    const sx = mx * innerWidth, sy = my * innerHeight;
+    const sr = innerWidth * 0.22;
+    const sg = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr);
+    sg.addColorStop(0, 'rgba(220, 245, 255, 0.32)');
+    sg.addColorStop(1, 'rgba(220, 245, 255, 0)');
+    ctx.fillStyle = sg;
+    ctx.fillRect(0, 0, innerWidth, innerHeight);
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

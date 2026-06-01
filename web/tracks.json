@@ -1,0 +1,37 @@
+[
+  {
+    "id": "here-i-am",
+    "title": "Here I Am",
+    "album": "NURK · 2024",
+    "duration_ms": null,
+    "preview_url": "audio/here-i-am.mp3"
+  },
+  {
+    "id": "touch-my-body-dub",
+    "title": "Touch My Body (Dub)",
+    "album": "NURK · Unreleased",
+    "duration_ms": null,
+    "preview_url": "audio/touch-my-body-dub.wav"
+  },
+  {
+    "id": "headlock-demo",
+    "title": "Headlock",
+    "album": "NURK · Demo",
+    "duration_ms": null,
+    "preview_url": "audio/headlock-demo.wav"
+  },
+  {
+    "id": "intimacy-demo",
+    "title": "Intimacy",
+    "album": "NURK · Demo",
+    "duration_ms": null,
+    "preview_url": "audio/intimacy-demo.wav"
+  },
+  {
+    "id": "a-namorada",
+    "title": "A Namorada",
+    "album": "NURK · Unreleased",
+    "duration_ms": null,
+    "preview_url": "audio/a-namorada.wav"
+  }
+]

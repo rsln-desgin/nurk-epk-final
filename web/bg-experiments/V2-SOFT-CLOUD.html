@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NURK / V2 · SOFT CLOUD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fg:      oklch(0.97 0.005 250);
+    --fg-soft: oklch(0.90 0.012 245);
+    --display: 'Anton', 'Arial Narrow', sans-serif;
+    --sans:    'Inter', system-ui, sans-serif;
+    --mono:    'JetBrains Mono', ui-monospace, monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh; color: var(--fg);
+    font: 400 15px/1.55 var(--sans);
+    overflow: hidden;
+    background: linear-gradient(
+      180deg,
+      oklch(0.42 0.085 220)    0%,
+      oklch(0.58 0.085 220)   30%,
+      oklch(0.74 0.080 220)   55%,
+      oklch(0.87 0.075 220)   75%,
+      oklch(0.96 0.020 220)  100%
+    );
+  }
+  #bg { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  .stage {
+    position: relative; z-index: 2;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .mark {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(120px, 28vw, 480px);
+    line-height: 0.86; letter-spacing: -0.02em;
+    text-transform: uppercase; margin: 0;
+    text-shadow: 0 1px 0 oklch(1 0 0 / 0.10);
+  }
+  .caption {
+    position: fixed; left: 16px; bottom: 16px; z-index: 50;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--fg-soft);
+    padding: 10px 14px; border-radius: 8px;
+    background: oklch(1 0.01 245 / 0.06);
+    border: 1px solid oklch(1 0.01 245 / 0.14);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+</style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <main class="stage"><h1 class="mark">NURK</h1></main>
+  <div class="caption">V2 · SOFT CLOUD · spacious ambient floor layer, no rising</div>
+
+<script>
+(() => {
+  const c   = document.getElementById('bg');
+  const ctx = c.getContext('2d');
+
+  /* a few huge low-alpha blobs anchored near the bottom that drift slowly.
+     not really "rising" — a quiet, ambient floor of cold air. */
+
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    c.width  = Math.floor(innerWidth  * dpr);
+    c.height = Math.floor(innerHeight * dpr);
+    c.style.width  = innerWidth  + 'px';
+    c.style.height = innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  /* radius is in fractions of the smaller viewport dimension */
+  const blobs = [
+    { bx: 0.18, by: 0.96, r: 0.55, alpha: 0.16, pX: 0.0,  pY: 1.7, pR: 0.4 },
+    { bx: 0.42, by: 1.02, r: 0.70, alpha: 0.20, pX: 2.1,  pY: 0.6, pR: 1.9 },
+    { bx: 0.65, by: 0.95, r: 0.60, alpha: 0.18, pX: 4.0,  pY: 3.2, pR: 0.9 },
+    { bx: 0.88, by: 1.00, r: 0.50, alpha: 0.15, pX: 5.5,  pY: 2.4, pR: 2.7 },
+  ];
+
+  const FREQ_X = 0.00018;
+  const FREQ_Y = 0.00012;
+  const FREQ_R = 0.00015;
+  const DRIFT_X_PX = 70;
+  const DRIFT_Y_PX = 30;
+
+  function frame(now) {
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    ctx.globalCompositeOperation = 'lighter';
+
+    const base = Math.min(innerWidth, innerHeight);
+
+    for (const b of blobs) {
+      const cx = innerWidth  * b.bx + Math.sin(now * FREQ_X + b.pX) * DRIFT_X_PX;
+      const cy = innerHeight * b.by + Math.sin(now * FREQ_Y + b.pY) * DRIFT_Y_PX;
+      const r  = base * b.r * (1 + Math.sin(now * FREQ_R + b.pR) * 0.10);
+
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      g.addColorStop(0,    `rgba(225, 240, 250, ${b.alpha})`);
+      g.addColorStop(0.55, `rgba(210, 230, 245, ${b.alpha * 0.35})`);
+      g.addColorStop(1,    'rgba(210, 230, 245, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, innerWidth, innerHeight);
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

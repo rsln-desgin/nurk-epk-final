@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+
+@page { size: A4; margin: 0; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:   #09172A;
+  --cyan: #90E0EF;
+  --fg:   #EEF4FF;
+  --soft: #7E9AB2;
+  --dim:  rgba(144,224,239,0.18);
+  --pad:  24mm;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', sans-serif;
+  font-size: 9pt;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.page {
+  width: 210mm;
+  height: 297mm;
+  padding: var(--pad);
+  overflow: hidden;
+  page-break-after: always;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ─── TYPE ─── */
+
+.wordmark {
+  font-family: 'Anton', sans-serif;
+  font-size: 108pt;
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+
+.label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6.5pt;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+h2 {
+  font-family: 'Anton', sans-serif;
+  font-size: 10pt;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+  margin-bottom: 4mm;
+}
+
+p {
+  line-height: 1.65;
+  color: #BDD0E0;
+  font-size: 8.5pt;
+}
+
+a { color: var(--cyan); text-decoration: none; }
+
+/* ─── RULE ─── */
+
+.rule {
+  width: 100%;
+  height: 0.5pt;
+  background: var(--dim);
+  margin: 5mm 0;
+}
+
+/* ─── COVER LAYOUT ─── */
+
+.cover-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8mm;
+}
+
+.cover-head img {
+  width: 58mm;
+  height: 74mm;
+  object-fit: cover;
+  object-position: center top;
+  flex-shrink: 0;
+  display: block;
+}
+
+.cover-text {
+  flex: 1;
+  padding-top: 3mm;
+}
+
+.cover-text .wordmark {
+  margin-bottom: 3mm;
+}
+
+/* ─── GENRES ─── */
+
+.genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2mm;
+  margin: 4mm 0;
+}
+
+.genre-tag {
+  border: 0.5pt solid var(--dim);
+  padding: 1.5mm 4mm;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6pt;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+/* ─── STATS ─── */
+
+.stats {
+  display: flex;
+  gap: 3mm;
+  margin: 5mm 0;
+}
+
+.stat {
+  flex: 1;
+  border-top: 1pt solid var(--cyan);
+  padding-top: 3mm;
+}
+
+.stat-val {
+  font-family: 'Anton', sans-serif;
+  font-size: 20pt;
+  color: var(--fg);
+  line-height: 1;
+  margin-bottom: 1.5mm;
+}
+
+.stat-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 5.5pt;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+/* ─── SIMILAR ─── */
+
+.similar {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6.5pt;
+  letter-spacing: 0.12em;
+  color: var(--soft);
+  margin-top: 4mm;
+}
+
+.similar span { color: #7090A8; margin: 0 1mm; }
+
+/* ─── PAGE 2 ─── */
+
+.photos {
+  display: flex;
+  gap: 3mm;
+  margin: 4mm 0;
+}
+
+.photos img {
+  display: block;
+  object-fit: cover;
+}
+
+.photos .wide { width: 100mm; height: 56mm; }
+.photos .tall { flex: 1; height: 56mm; }
+
+/* ─── RELEASES ─── */
+
+.release {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 3mm 0;
+  border-bottom: 0.5pt solid var(--dim);
+}
+
+.release-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 8.5pt;
+  color: var(--fg);
+}
+
+.release-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6pt;
+  letter-spacing: 0.1em;
+  color: var(--soft);
+}
+
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 5.5pt;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: 0.5pt solid var(--dim);
+  padding: 0.8mm 2.5mm;
+  color: var(--soft);
+  white-space: nowrap;
+}
+
+.chip.live { border-color: var(--cyan); color: var(--cyan); }
+
+/* ─── VENUES ─── */
+
+.venues {
+  display: flex;
+  gap: 3mm;
+  margin-bottom: 5mm;
+}
+
+.venue {
+  flex: 1;
+  border-left: 1.5pt solid var(--cyan);
+  padding-left: 3mm;
+}
+
+.venue-name {
+  font-family: 'Anton', sans-serif;
+  font-size: 9pt;
+  letter-spacing: 0.05em;
+  color: var(--fg);
+  margin-bottom: 1mm;
+}
+
+.venue-detail {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 5.5pt;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+/* ─── BOOKING ─── */
+
+.booking-row {
+  display: flex;
+  gap: 1mm;
+  margin-bottom: 2mm;
+  align-items: baseline;
+}
+
+.booking-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6pt;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--soft);
+  width: 28mm;
+  flex-shrink: 0;
+}
+
+.booking-val {
+  font-size: 8pt;
+  color: #BDD0E0;
+}
+
+/* ─── LINKS ─── */
+
+.links {
+  display: flex;
+  gap: 3mm;
+  flex-wrap: wrap;
+  margin-top: 2mm;
+}
+
+.link-pill {
+  border: 0.5pt solid var(--cyan);
+  padding: 2mm 5mm;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6pt;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+/* ─── FOOTER ─── */
+
+.page-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.footer-watermark {
+  font-family: 'Anton', sans-serif;
+  font-size: 36pt;
+  color: rgba(144,224,239,0.06);
+  line-height: 1;
+}
+
+.footer-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6pt;
+  letter-spacing: 0.2em;
+  color: var(--soft);
+}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ PAGE 1 ═══ -->
+<div class="page">
+
+  <div class="cover-head">
+    <div class="cover-text">
+      <div class="wordmark">NURK</div>
+      <div class="label">DJ · Tallinn, Estonia</div>
+
+      <div class="genres" style="margin-top:5mm;">
+        <span class="genre-tag">Hard House</span>
+        <span class="genre-tag">Trance</span>
+        <span class="genre-tag">UK Garage</span>
+        <span class="genre-tag">House</span>
+        <span class="genre-tag">Techno</span>
+      </div>
+
+      <p style="margin-top:4mm; max-width:92mm;">
+        Tallinn-based DJ with 4+ years shaping dynamic electronic sets.
+        Blends Hard House, Trance, and UK Garage into immersive crowd-focused journeys
+        that move naturally between club nights, late-night sessions, and open-air stages.
+      </p>
+
+      <div class="stats" style="margin-top:6mm;">
+        <div class="stat">
+          <div class="stat-val">50+</div>
+          <div class="stat-lbl">Gigs</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">1K+</div>
+          <div class="stat-lbl">Peak crowd</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">4+</div>
+          <div class="stat-lbl">Years</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">10<span style="font-size:12pt;">/mo</span></div>
+          <div class="stat-lbl">Avg gigs</div>
+        </div>
+      </div>
+    </div>
+
+    <img src="web/portrait.jpg" alt="NURK">
+  </div>
+
+  <div class="rule"></div>
+
+  <p style="font-size:8pt;">
+    Hailing from Tallinn, NURK is a DJ and producer whose production background
+    translates directly into performances: carefully curated selections and an ear
+    for detail that keeps audiences locked in from start to finish. Resident at Club Studio,
+    with sets at Kultuurikatel (1000+ cap), D3, and the Beach Grind Afterparty.
+    Versatile across all electronic formats. Available worldwide.
+  </p>
+
+  <div class="similar" style="margin-top:5mm;">
+    <span class="label" style="margin-right:2mm;">If you like</span>
+    KETTAMA <span>·</span> MARLON HOFFSTADT <span>·</span> MORGAN SEATREE <span>·</span> PEGASSI
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-watermark">NURK</div>
+    <div class="footer-num">01 / 02</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ PAGE 2 ═══ -->
+<div class="page">
+
+  <!-- LIVE -->
+  <h2>Live</h2>
+
+  <div class="venues">
+    <div class="venue">
+      <div class="venue-name">KULTUURIKATEL</div>
+      <div class="venue-detail">Tallinn · 1000+ cap</div>
+    </div>
+    <div class="venue">
+      <div class="venue-name">D3</div>
+      <div class="venue-detail">Tallinn · Club</div>
+    </div>
+    <div class="venue">
+      <div class="venue-name">CLUB STUDIO</div>
+      <div class="venue-detail">Tallinn · Resident</div>
+    </div>
+  </div>
+
+  <div class="photos">
+    <img class="wide" src="web/live-wide.jpg" alt="Live at D3">
+    <img class="tall" src="web/live-crowd.jpg" alt="Live crowd">
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- MUSIC -->
+  <h2>Music</h2>
+
+  <div class="release">
+    <div>
+      <div class="release-title">Between Us</div>
+      <div class="release-meta">NURK × DJ Lumi &nbsp;·&nbsp; Obskuur / DE</div>
+    </div>
+    <span class="chip">Forthcoming</span>
+  </div>
+
+  <div class="release">
+    <div>
+      <div class="release-title">NURK EP</div>
+      <div class="release-meta">NURK &nbsp;·&nbsp; Obskuur / DE</div>
+    </div>
+    <span class="chip">Forthcoming</span>
+  </div>
+
+  <div class="release">
+    <div>
+      <div class="release-title">Here I Am</div>
+      <div class="release-meta">NURK &nbsp;·&nbsp; 2024</div>
+    </div>
+    <span class="chip live">Out Now</span>
+  </div>
+
+  <div class="release">
+    <div>
+      <div class="release-title">Live at Kultuurikatel</div>
+      <div class="release-meta">SoundCloud &nbsp;·&nbsp; Hard House / Trance &nbsp;·&nbsp; 2024</div>
+    </div>
+    <span class="chip live">Recording</span>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- BOOKING -->
+  <h2>Booking</h2>
+
+  <div class="booking-row">
+    <span class="booking-key">Tech rider</span>
+    <span class="booking-val">CDJ 3000 / NXS2 &nbsp;·&nbsp; DJM 900+ &nbsp;·&nbsp; 90 min preferred</span>
+  </div>
+  <div class="booking-row">
+    <span class="booking-key">Available</span>
+    <span class="booking-val">Year-round &nbsp;·&nbsp; touring open &nbsp;·&nbsp; no blackout dates</span>
+  </div>
+  <div class="booking-row">
+    <span class="booking-key">Markets</span>
+    <span class="booking-val">Estonia · UK · Germany · Netherlands · Australia</span>
+  </div>
+  <div class="booking-row">
+    <span class="booking-key">Contact</span>
+    <span class="booking-val"><a href="mailto:musicbynurk@gmail.com">musicbynurk@gmail.com</a></span>
+  </div>
+
+  <div class="links" style="margin-top:5mm;">
+    <a class="link-pill" href="https://on.soundcloud.com/kYVPycrYflKU7EIF81">SoundCloud</a>
+    <a class="link-pill" href="https://open.spotify.com/artist/1Apbc4hNE6XJWSm3Ss4JaF">Spotify</a>
+    <a class="link-pill" href="https://www.instagram.com/ukunrk/">Instagram</a>
+    <a class="link-pill" href="https://linktr.ee/NURKK">Linktree</a>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-watermark">NURK</div>
+    <div class="footer-num">02 / 02</div>
+  </div>
+
+</div>
+
+</body>
+</html>
