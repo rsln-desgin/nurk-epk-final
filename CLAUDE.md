@@ -6,6 +6,8 @@ A single-file vanilla HTML/CSS/JS one-pager EPK for a Tallinn-based DJ named NUR
 
 **The working file is `web/sketch.html`.** That's the entire product. No build step. No framework.
 
+**`web/index.html` is a stale snapshot — do not edit it.** Vercel serves `sketch.html` directly via the rewrite in `vercel.json`.
+
 ## Layout
 
 ```
