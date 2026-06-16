@@ -39,6 +39,8 @@ NURK EPK FINAL/
 
 `preview_start sketch` — runs a Node static server on `:8765` rooted at `web/`. Config: `.claude/launch.json`.
 
+**The server supports HTTP range requests** (required for audio seeking). If `audio.duration` is ever `Infinity` in the console, the server is not running or was restarted without range support — kill `:8765` and restart via `preview_start sketch`. The server also serves `.wav` and `.m4a` with correct MIME types.
+
 ## Source-of-truth precedence (when docs disagree)
 
 1. The current state of `web/sketch.html`

@@ -899,11 +899,25 @@
     outline: 2px solid var(--signal);
     outline-offset: 3px;
   }
+  .book__btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+  [data-fs-error]:empty { display: none; }
+  .book__field-error {
+    display: block; font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.15em; text-transform: uppercase; color: oklch(0.72 0.14 25); margin-top: 6px;
+  }
+  .book__success { padding: 56px 40px; }
+  .book__success[hidden] { display: none; }
+  .book__success-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.28em;
+    text-transform: uppercase; color: var(--signal); margin-bottom: 16px;
+  }
+  .book__success-msg { font-size: 20px; color: var(--fg-soft); line-height: 1.55; }
 
   @media (max-width: 768px) {
     .book__form { padding: 24px; grid-template-columns: 1fr; gap: 18px; }
     .book__submit { flex-direction: column-reverse; align-items: stretch; gap: 14px; }
     .book__btn { justify-content: center; }
+    .book__success { padding: 40px 24px; }
   }
 
   /* ========================================================================
@@ -987,6 +1001,135 @@
   .about3__bio p:last-child { margin-bottom: 0; }
   .about3__bio strong { font-weight: 700; }
   .about3__bio em { font-style: normal; font-weight: 600; }
+
+  /* ========================================================================
+     MINI PLAYER — fixed floating playback widget
+     ======================================================================== */
+  .mini-player {
+    position: fixed;
+    top: 92px; right: 16px;
+    z-index: 55;
+    width: 288px;
+    border-radius: 14px;
+    background: oklch(1 0.01 245 / 0.08);
+    border: 1px solid oklch(1 0.01 245 / 0.18);
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+    box-shadow:
+      inset 0  1px 0 oklch(1 0.01 245 / 0.22),
+      inset 0 -1px 0 oklch(0.18 0.04 245 / 0.12),
+      0 20px 60px oklch(0.18 0.04 245 / 0.40),
+      0  4px 12px oklch(0.18 0.04 245 / 0.18);
+    overflow: hidden;
+    transform: translateX(calc(100% + 24px));
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 520ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity   280ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .mini-player.is-visible {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .mini-player::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.45; mix-blend-mode: overlay; border-radius: inherit;
+  }
+  .mini-player__inner {
+    padding: 14px 16px 14px;
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .mini-player__top {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .mini-player__live {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--signal);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .mini-player__dot {
+    width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+    background: var(--signal); box-shadow: 0 0 8px var(--signal);
+    animation: pulse 2.4s var(--ease) infinite;
+  }
+  .mini-player__btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid oklch(1 0.01 245 / 0.22);
+    background: oklch(1 0.01 245 / 0.06);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--fg-soft); cursor: pointer; flex-shrink: 0;
+    transition: border-color 220ms var(--ease), background 220ms var(--ease), color 220ms var(--ease);
+  }
+  .mini-player__btn:hover {
+    border-color: oklch(1 0.01 245 / 0.44);
+    background: oklch(1 0.01 245 / 0.10);
+    color: var(--fg);
+  }
+  .mini-player__btn:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+  .mini-player__btn svg { width: 10px; height: 10px; }
+  .mini-player__track { min-width: 0; }
+  .mini-player__title {
+    font-family: var(--display); font-size: 22px; line-height: 1.0;
+    letter-spacing: -0.01em; text-transform: uppercase;
+    color: var(--fg); margin: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mini-player__sub {
+    margin-top: 3px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--muted); font-weight: 600;
+  }
+  .mini-player__album { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .mini-player__time  { font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .mini-player__controls {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding-top: 2px;
+  }
+  .mini-player__play {
+    width: 36px; height: 36px;
+    background: var(--signal); border-color: oklch(0.92 0.085 220 / 0.70);
+    color: var(--ink);
+  }
+  .mini-player__play:hover {
+    background: oklch(0.96 0.09 220); border-color: oklch(0.96 0.09 220);
+    color: var(--ink);
+  }
+  .mini-player__play.is-paused {
+    background: oklch(1 0.01 245 / 0.06);
+    border-color: oklch(1 0.01 245 / 0.22);
+    color: var(--fg-soft);
+  }
+  .mini-player__play.is-paused:hover {
+    background: var(--signal); border-color: oklch(0.92 0.085 220 / 0.70);
+    color: var(--ink);
+  }
+  /* Progress bar — div-based, same pattern as hafisn07/mini-music-player */
+  .mini-player__progress {
+    position: relative; z-index: 2;
+    border-top: 1px solid oklch(1 0.01 245 / 0.12);
+    height: 4px;
+    background: oklch(0.18 0.04 245 / 0.38);
+    cursor: pointer;
+    user-select: none;
+  }
+  .mini-player__progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #90e0ef;
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    .mini-player { top: 80px; right: 10px; width: min(280px, calc(100vw - 20px)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mini-player { transform: none; transition: opacity 200ms; }
+  }
 </style>
 </head>
 <body>
@@ -1003,7 +1146,7 @@
     <div class="nav__links">
       <a class="nav__link" href="#music">Music</a>
       <a class="nav__link" href="#live">Live</a>
-      <a class="nav__link" href="#book">Bookings</a>
+      <a class="nav__link" href="#book">Get in touch</a>
       <a class="nav__link" href="#contact">Contact</a>
     </div>
     <div class="nav__mark">NURK</div>
@@ -1023,7 +1166,7 @@
         <svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 3 L8 6 L4 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
       <a class="nav-drawer__link" href="#book">
-        Bookings
+        Get in touch
         <svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 3 L8 6 L4 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
       <a class="nav-drawer__link" href="#contact">
@@ -1139,6 +1282,13 @@
         "album": "NURK · Unreleased",
         "duration_ms": null,
         "preview_url": "audio/a-namorada.m4a"
+      },
+      {
+        "id": "revolution-demo",
+        "title": "Revolution",
+        "album": "NURK · Demo",
+        "duration_ms": null,
+        "preview_url": "audio/NURK_Revolution_DEMO.wav"
       }
     ]
     </script>
@@ -1171,60 +1321,66 @@
   <section class="section book" id="book">
     <div class="section__inner">
       <header class="section__head">
-        <h2 class="section__title reveal-chars">Bookings.</h2>
-        <p class="section__sub reveal" style="--reveal-delay: 200ms;">Every booking quoted individually · Tell me about the event</p>
+        <h2 class="section__title reveal-chars">Get in touch.</h2>
+        <p class="section__sub reveal" style="--reveal-delay: 200ms;">Every quote is individual · Bookings, collabs, label inquiries</p>
       </header>
 
-      <!-- TODO: replace `action` with Typeform / Tally / Formspree endpoint when chosen.
-           Visual stays identical; only the form attributes change. -->
-      <form class="book__form card reveal" style="--reveal-delay: 80ms;"
-            action="mailto:musicbynurk@gmail.com"
-            method="post"
-            enctype="text/plain">
+      <div data-fs-success hidden class="book__success card">
+        <p class="book__success-label">Request sent</p>
+        <p class="book__success-msg">I'll reply within 48 hours.</p>
+      </div>
+
+      <form id="book-form" class="book__form card reveal" style="--reveal-delay: 80ms;"
+            action="https://formspree.io/f/mojzbeov"
+            method="POST">
         <div class="book__field">
           <label class="book__label" for="bk-name">Name</label>
-          <input class="book__input" id="bk-name" name="Name" type="text" required autocomplete="name" placeholder="Your name">
+          <input class="book__input" id="bk-name" name="Name" type="text" required autocomplete="name" placeholder="Your name" data-fs-field>
         </div>
 
         <div class="book__field">
           <label class="book__label" for="bk-email">Email</label>
-          <input class="book__input" id="bk-email" name="Email" type="email" required autocomplete="email" placeholder="you@domain.com">
+          <input class="book__input" id="bk-email" name="Email" type="email" required autocomplete="email" placeholder="you@domain.com" data-fs-field>
+          <span data-fs-error="Email" class="book__field-error"></span>
         </div>
 
         <div class="book__field">
           <label class="book__label" for="bk-company">Promoter / Company <small>optional</small></label>
-          <input class="book__input" id="bk-company" name="Promoter" type="text" autocomplete="organization" placeholder="Venue, agency, or label">
+          <input class="book__input" id="bk-company" name="Promoter" type="text" autocomplete="organization" placeholder="Venue, agency, or label" data-fs-field>
         </div>
 
         <div class="book__field">
-          <label class="book__label" for="bk-type">Event type</label>
+          <label class="book__label" for="bk-type">Inquiry type</label>
           <div class="book__select-wrap">
-            <select class="book__select" id="bk-type" name="Event type" required>
+            <select class="book__select" id="bk-type" name="Inquiry type" required data-fs-field>
               <option value="" disabled selected>Select one</option>
               <option>Club</option>
               <option>Festival</option>
               <option>Afterparty</option>
               <option>Brand / private</option>
+              <option>Collab</option>
+              <option>Label</option>
               <option>Other</option>
             </select>
           </div>
         </div>
 
         <div class="book__field book__field--full">
-          <label class="book__label" for="bk-date">Proposed date</label>
+          <label class="book__label" for="bk-date">Date <small>if applicable</small></label>
           <div class="book__date-wrap">
-            <input class="book__input" id="bk-date" name="Proposed date" type="date">
+            <input class="book__input" id="bk-date" name="Proposed date" type="date" data-fs-field>
           </div>
         </div>
 
         <div class="book__field book__field--full">
-          <label class="book__label" for="bk-about">About the event <small>venue, capacity, time slot, vibe — sell it to me</small></label>
-          <textarea class="book__textarea" id="bk-about" name="About the event" rows="3" required placeholder="Where, when, the room, the lineup, what you're going for. The more you give me, the better the quote."></textarea>
+          <label class="book__label" for="bk-about">Tell me about it <small>the what, when, why · sell it to me</small></label>
+          <textarea class="book__textarea" id="bk-about" name="Message" rows="3" required placeholder="What you're working on, what you need from me, what the brief looks like. The more detail, the better." data-fs-field></textarea>
         </div>
 
+        <p data-fs-error class="book__field-error" style="grid-column:1/-1;margin:0;"></p>
         <div class="book__submit">
           <p class="book__submit-note">Reply within 48h</p>
-          <button class="book__btn" type="submit">
+          <button class="book__btn" type="submit" data-fs-submit-btn>
             Send request
             <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M2 12 L12 2 M5 2 H12 V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -1414,6 +1570,13 @@
         if (next > -1) playIndex(next);
         else { setActive(-1); activeIndex = -1; }
       });
+
+      // Expose playback interface so the mini player can call prev/next
+      window.__nurkPlayer = {
+        getTracks: () => tracks,
+        getIndex:  () => activeIndex,
+        playIndex,
+      };
     })();
   </script>
 
@@ -1565,6 +1728,134 @@
       });
     })();
   </script>
+
+  <!-- MINI PLAYER — pops in top-right when audio plays -->
+  <div class="mini-player" id="mini-player" role="region" aria-label="Now playing" aria-live="polite">
+    <div class="mini-player__inner">
+      <div class="mini-player__top">
+        <span class="mini-player__live">
+          <span class="mini-player__dot" aria-hidden="true"></span>
+          Now Playing
+        </span>
+        <button class="mini-player__btn" id="mini-close" aria-label="Close player">
+          <svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 2 L10 10 M10 2 L2 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="mini-player__track">
+        <p class="mini-player__title" id="mini-title">—</p>
+        <div class="mini-player__sub">
+          <span class="mini-player__album" id="mini-album">—</span>
+          <span class="mini-player__time" id="mini-time">0:00</span>
+        </div>
+      </div>
+      <div class="mini-player__controls">
+        <button class="mini-player__btn" id="mini-prev" aria-label="Previous track">
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><rect x="2" y="2" width="1.5" height="8" rx="0.5"/><path d="M10 2 L4.5 6 L10 10 Z"/></svg>
+        </button>
+        <button class="mini-player__btn mini-player__play is-paused" id="mini-play" aria-label="Play">
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M2 1 L11 6 L2 11 Z"/></svg>
+        </button>
+        <button class="mini-player__btn" id="mini-next" aria-label="Next track">
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><rect x="8.5" y="2" width="1.5" height="8" rx="0.5"/><path d="M2 2 L7.5 6 L2 10 Z"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="mini-player__progress" id="mini-progress">
+      <div class="mini-player__progress-fill" id="mini-progress-fill"></div>
+    </div>
+  </div>
+
+  <script>
+    // Mini player — seek logic ported from hafisn07/mini-music-player (updateBar)
+    (() => {
+      const miniEl    = document.getElementById('mini-player');
+      const miniPlay  = document.getElementById('mini-play');
+      const miniPrev  = document.getElementById('mini-prev');
+      const miniNext  = document.getElementById('mini-next');
+      const miniClose = document.getElementById('mini-close');
+      const miniTitle = document.getElementById('mini-title');
+      const miniAlbum = document.getElementById('mini-album');
+      const miniTime  = document.getElementById('mini-time');
+      const progress  = document.getElementById('mini-progress');
+      const fill      = document.getElementById('mini-progress-fill');
+      const audio     = document.getElementById('player-audio');
+      if (!miniEl || !audio) return;
+
+      const PLAY_SVG  = '<svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M2 1 L11 6 L2 11 Z"/></svg>';
+      const PAUSE_SVG = '<svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><rect x="2" y="1" width="3" height="10"/><rect x="7" y="1" width="3" height="10"/></svg>';
+      const fmt = s => isFinite(s) ? `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}` : '0:00';
+
+      const syncInfo = () => {
+        const row = document.querySelector('.track-row.is-active');
+        if (!row) return;
+        miniTitle.textContent = row.querySelector('.track-row__title')?.textContent?.trim() || '—';
+        miniAlbum.textContent = row.querySelector('.track-row__sub')?.textContent?.trim()   || '—';
+      };
+      const setPlaying = () => { miniPlay.innerHTML = PAUSE_SVG; miniPlay.setAttribute('aria-label','Pause'); miniPlay.classList.remove('is-paused'); };
+      const setPaused  = () => { miniPlay.innerHTML = PLAY_SVG;  miniPlay.setAttribute('aria-label','Play');  miniPlay.classList.add('is-paused'); };
+
+      const playerList = document.getElementById('player-list');
+      if (playerList) {
+        new MutationObserver(() => {
+          if (playerList.querySelector('.track-row.is-active')) { syncInfo(); miniEl.classList.add('is-visible'); }
+        }).observe(playerList, { subtree: true, attributeFilter: ['class'] });
+      }
+
+      audio.addEventListener('play',  () => { syncInfo(); miniEl.classList.add('is-visible'); setPlaying(); });
+      audio.addEventListener('pause', setPaused);
+      audio.addEventListener('ended', () => { setPaused(); if (fill) fill.style.width = '0%'; miniTime.textContent = '0:00'; });
+
+      let seeking = false;
+      const updateBar = (clientX) => {
+        if (!isFinite(audio.duration) || !audio.duration || !progress || !fill) return;
+        const rect       = progress.getBoundingClientRect();
+        let position     = clientX - rect.left;
+        let percentage   = (100 * position) / rect.width;
+        if (percentage > 100) percentage = 100;
+        if (percentage < 0)   percentage = 0;
+        fill.style.width     = percentage + '%';
+        audio.currentTime    = (audio.duration * percentage) / 100;
+        miniTime.textContent = fmt(audio.currentTime);
+      };
+
+      progress?.addEventListener('mousedown', (e) => { seeking = true; updateBar(e.clientX); });
+      document.addEventListener('mousemove',  (e) => { if (seeking) updateBar(e.clientX); });
+      document.addEventListener('mouseup',    ()  => { seeking = false; });
+
+      progress?.addEventListener('touchstart', (e) => { seeking = true;  updateBar(e.touches[0].clientX); }, { passive: true });
+      document.addEventListener('touchmove',   (e) => { if (seeking) updateBar(e.touches[0].clientX); },   { passive: true });
+      document.addEventListener('touchend',    ()  => { seeking = false; }, { passive: true });
+
+      audio.addEventListener('timeupdate', () => {
+        if (!isFinite(audio.duration) || !audio.duration || seeking || !fill) return;
+        fill.style.width     = ((audio.currentTime / audio.duration) * 100) + '%';
+        miniTime.textContent = fmt(audio.currentTime);
+      });
+
+      miniPlay.addEventListener('click', () => { if (audio.paused) audio.play().catch(()=>{}); else audio.pause(); });
+
+      miniPrev.addEventListener('click', () => {
+        const np = window.__nurkPlayer; if (!np) return;
+        const tracks = np.getTracks(), cur = np.getIndex();
+        let prev = -1;
+        for (let i = cur - 1; i >= 0; i--) { if (tracks[i]?.preview_url) { prev = i; break; } }
+        if (prev >= 0) np.playIndex(prev);
+      });
+      miniNext.addEventListener('click', () => {
+        const np = window.__nurkPlayer; if (!np) return;
+        const tracks = np.getTracks(), cur = np.getIndex();
+        const next = tracks.findIndex((t, i) => i > cur && t.preview_url);
+        if (next >= 0) np.playIndex(next);
+      });
+      miniClose.addEventListener('click', () => { audio.pause(); miniEl.classList.remove('is-visible'); });
+    })();
+  </script>
+
+  <script>
+    window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
+    formspree('initForm', { formElement: '#book-form', formId: 'mojzbeov' });
+  </script>
+  <script src="https://unpkg.com/@formspree/ajax@1" defer></script>
 
 </body>
 </html>
