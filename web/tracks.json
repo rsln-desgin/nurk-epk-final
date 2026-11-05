@@ -2,9 +2,16 @@
   {
     "id": "here-i-am",
     "title": "Here I Am",
-    "album": "NURK · 2024",
+    "album": "NURK · 2025",
     "duration_ms": null,
     "preview_url": "audio/here-i-am.mp3"
+  },
+  {
+    "id": "pleasure",
+    "title": "Pleasure",
+    "album": "NURK · 2026",
+    "duration_ms": null,
+    "preview_url": null
   },
   {
     "id": "touch-my-body-dub",
